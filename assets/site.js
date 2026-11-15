@@ -60,3 +60,11 @@
     window.open('https://wa.me/919913911614?text='+encodeURIComponent(lines.join('\n')),'_blank');
   });
 })();
+
+// Product gallery thumbnails
+(function(){
+  var main=document.getElementById('mainimg');if(!main)return;
+  document.querySelectorAll('.thumbs img').forEach(function(t){
+    t.addEventListener('click',function(){main.src=t.dataset.full;document.querySelectorAll('.thumbs img').forEach(function(x){x.classList.remove('on')});t.classList.add('on')});
+  });
+})();
