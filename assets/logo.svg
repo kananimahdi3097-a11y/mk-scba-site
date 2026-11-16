@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="20 17.5 120 71.2" role="img" aria-label="M.K ENTERPRISE">
+  <defs><linearGradient id="mkb" x1="0" x2="1"><stop offset="0" stop-color="#1F6FB9"/><stop offset="1" stop-color="#2B6CB4"/></linearGradient></defs>
+  <path fill="url(#mkb)" d="M21.7 19.2h17l17.500 26.600 18-26.600h1.600L76.500 22C80 42 86 57 94.200 65.300l15 8.900c2.800 1.800 12.800 5.300 24.100 5.800l4.700 7H75.800V45.800L56.200 71.300 37 45.800V87H21.700z"/>
+  <path fill="#2F2E6A" d="M74.200 19.200h17.100V45l27.400-25.800H137l-26.700 29.100 23 31.700c-11.300-.5-21.300-4-24.100-5.800l-10.500-15-4.500 6.100C86 57 80 42 76.500 22z"/>
+</svg>
