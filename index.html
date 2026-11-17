@@ -925,16 +925,17 @@ async function main(){
     const S = 512, c = mkCanvas(S), g = c.getContext('2d'), cx = S / 2, cy = S / 2;
     const ang = (v) => (225 - (v / 300) * 270) * PI / 180;
     const pt = (v, r) => [cx + Math.cos(ang(v)) * r, cy - Math.sin(ang(v)) * r];
-    g.fillStyle = '#eef3e4'; g.fillRect(0, 0, S, S);
-    const arc = (a, b, col, w, r) => { g.beginPath(); g.strokeStyle = col; g.lineWidth = w; g.arc(cx, cy, r, -ang(a), -ang(b), false); g.stroke(); };
-    arc(0, 50, '#e02b20', 26, 212); arc(50, 250, '#cfd6c6', 26, 212); arc(250, 300, '#0C9A63', 26, 212);
+    g.fillStyle = '#f5f6f3'; g.fillRect(0, 0, S, S);
+    g.beginPath(); g.strokeStyle = '#e02b20'; g.lineWidth = 46; g.arc(cx, cy, 197, -ang(0), -ang(50), false); g.stroke();
     for (let v = 0; v <= 300; v += 10){
-      const major = v % 50 === 0, [x1, y1] = pt(v, 198), [x2, y2] = pt(v, major ? 160 : 180);
-      g.beginPath(); g.strokeStyle = '#101114'; g.lineWidth = major ? 7 : 3; g.moveTo(x1, y1); g.lineTo(x2, y2); g.stroke();
+      const major = v % 50 === 0, [x1, y1] = pt(v, 222), [x2, y2] = pt(v, major ? 172 : 196);
+      g.beginPath(); g.strokeStyle = '#0e0f12'; g.lineWidth = major ? 8 : 3.5; g.moveTo(x1, y1); g.lineTo(x2, y2); g.stroke();
     }
-    g.fillStyle = '#101114'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = '700 42px Manrope, Arial, sans-serif';
-    for (let v = 0; v <= 300; v += 50){ const [x, y] = pt(v, 122); g.fillText(String(v), x, y); }
-    g.fillStyle = '#55657B'; g.font = '700 34px Manrope, Arial, sans-serif'; g.fillText('bar', cx, cy + 100);
+    g.fillStyle = '#0e0f12'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.font = '700 54px "Arial Narrow", Manrope, Arial, sans-serif';
+    for (const v of [100, 200, 300]){ const [x, y] = pt(v, 126); g.fillText(String(v), x, y); }
+    g.font = '700 28px "Arial Narrow", Manrope, Arial, sans-serif'; { const [x, y] = pt(50, 140); g.fillText('50', x, y); }
+    g.font = '700 34px Manrope, Arial, sans-serif'; g.fillText('BAR', cx, cy + 152);
     return tex(c);
   }
   function radialTexture(inner, outer, stops, srgb = true){
@@ -1118,8 +1119,9 @@ async function main(){
       }
       g.add(mesh(ribbon(sp.slice(49), bodyN, .075, .014, { segs: 70 }), M.web));
       const b = sp[50], t = sp[51].clone().sub(sp[49]).normalize(), n = V(); bodyN(b, n);
-      g.add(orient(mesh(new THREE.BoxGeometry(.14, .11, .03), M.grey), b.clone().addScaledVector(n, .025), t, n));
-      g.add(orient(mesh(new THREE.BoxGeometry(.11, .022, .05), M.chrome), b.clone().addScaledVector(n, .035), t, n));
+      const bp0 = b.clone().addScaledVector(n, .026);
+      g.add(orient(mesh(new THREE.BoxGeometry(.15, .13, .02), M.plate), bp0, t, n));
+      for (const o of [-.045, 0, .045]) g.add(orient(mesh(new THREE.BoxGeometry(.15, .018, .042), M.plate), bp0.clone().addScaledVector(t, o), t, n));
       const e = sp[78], te = sp[79].clone().sub(sp[77]).normalize(), ne = V(); bodyN(e, ne);
       g.add(orient(mesh(new THREE.BoxGeometry(.1, .06, .025), M.grey), e.clone().addScaledVector(ne, .01), te, ne));
     }
@@ -1144,19 +1146,24 @@ async function main(){
     const boot = mesh(cyl(.2, .2, .11, 48), M.rubber); boot.rotation.x = PI / 2; g.add(boot);
     g.add(mesh(new THREE.TorusGeometry(.192, .02, 14, 56), M.rubber, 0, 0, .056));
     g.add(mesh(new THREE.TorusGeometry(.178, .006, 8, 56), M.chrome, 0, 0, .064));
-    const face = std({ map: gaugeTexture(), color: 0xd8d8d8, roughness: .7, envMapIntensity: .3 });
+    const face = std({ map: gaugeTexture(), color: 0xe2e2e2, roughness: .7, envMapIntensity: .3 });
+    g.add(mesh(new THREE.TorusGeometry(.2, .02, 10, 56), M.rubber, 0, 0, -.015));   // boot rib
     g.add(mesh(new THREE.CircleGeometry(.176, 56), face, 0, 0, .058));
-    needle.add(mesh(new THREE.BoxGeometry(.02, .17, .006), std({ color: 0x14161a, roughness: .5 }), 0, .05, 0));
-    needle.add(mesh(new THREE.BoxGeometry(.02, .05, .007), M.red, 0, .12, 0));
+    const nm = std({ color: 0x111215, roughness: .5, side: THREE.DoubleSide });
+    needle.add(mesh(new THREE.BoxGeometry(.009, .15, .005), nm, 0, .075, 0));
+    const tail = new THREE.Shape(); tail.moveTo(-.006, 0); tail.lineTo(-.022, -.058); tail.quadraticCurveTo(0, -.076, .022, -.058); tail.lineTo(.006, 0); tail.closePath();
+    needle.add(mesh(new THREE.ShapeGeometry(tail), nm, 0, 0, .003));
     const hb = mesh(cyl(.022, .022, .014, 18), M.rubber); hb.rotation.x = PI / 2; needle.add(hb);
     needle.position.z = .066; g.add(needle);
     g.add(mesh(new THREE.CircleGeometry(.17, 56), std({ color: 0xffffff, transparent: true, opacity: .16, roughness: 0, metalness: .1, envMapIntensity: 1.6 }), 0, 0, .08));
-    g.add(mesh(cyl(.032, .032, .12, 6), M.chrome, 0, -.25, 0));
-    g.add(mesh(cyl(.03, .03, .2, 16), M.chrome, .075, -.3, 0));       // warning whistle
-    g.add(mesh(cyl(.034, .034, .03, 16), M.rubber, .075, -.39, 0));
-    g.add(mesh(new THREE.BoxGeometry(.11, .035, .035), M.chrome, .04, -.21, 0));
+    g.add(mesh(cyl(.03, .03, .06, 6), M.chrome, 0, -.215, 0));                 // hex union under the boot
+    g.add(mesh(new THREE.BoxGeometry(.14, .13, .07), M.alu, .02, -.31, 0));    // brushed whistle block
+    g.add(mesh(cyl(.024, .024, .1, 16), M.chrome, .055, -.42, 0));             // low-air warning whistle
+    g.add(mesh(cyl(.027, .027, .07, 20), M.alu, .055, -.5, 0));                // knurled tip
+    g.add(mesh(cyl(.03, .03, .09, 14), M.chrome, -.03, -.41, 0));              // crimped hose ferrule
+    g.add(mesh(cyl(.033, .033, .012, 14), M.alu, -.03, -.39, 0)); g.add(mesh(cyl(.033, .033, .012, 14), M.alu, -.03, -.43, 0));
     g.add(mesh(new THREE.BoxGeometry(.12, .16, .03), M.grey, 0, 0, -.07));  // strap clip
-    g.updateMatrix(); gaugeHoseEnd = V(0, -.31, 0).applyMatrix4(g.matrix);
+    g.updateMatrix(); gaugeHoseEnd = V(-.03, -.46, 0).applyMatrix4(g.matrix);
   }
 
   // ----- Full-face mask, head harness, demand valve
@@ -1206,9 +1213,18 @@ async function main(){
   // ----- Hoses
   {
     const dvIn = V(.26, 1.588, -1.74);
-    G.hoses.add(mesh(tube([V(-.2, -1.14, -.1), V(-.5, -1.2, -.16), V(-.84, -1.0, -.58), V(-.77, -.5, -1.03), V(-.63, -.05, -1.3), gaugeHoseEnd], .02), M.hose));
+    const hpC = new THREE.CatmullRomCurve3([V(-.2, -1.14, -.1), V(-.5, -1.2, -.16), V(-.84, -1.0, -.58), V(-.77, -.5, -1.03), V(-.63, -.05, -1.3), gaugeHoseEnd], false, 'centripetal');
+    G.hoses.add(mesh(new THREE.TubeGeometry(hpC, 90, .02, 12), M.hose));
+    const ferrule = (c, u, r, dir) => {
+      const p = c.getPointAt(u), t = c.getTangentAt(u), q = new THREE.Quaternion().setFromUnitVectors(V(0, 1, 0), t);
+      for (const [rr, h, o, six] of [[r * 1.5, .1, 0, 0], [r * 1.64, .014, .03, 0], [r * 1.64, .014, -.03, 0], [r * 1.95, .04, dir * .07, 1]]){
+        const m = mesh(cyl(rr, rr, h, six ? 6 : 18), M.chromeH); m.quaternion.copy(q); m.position.copy(p).addScaledVector(t, o); G.hoses.add(m);
+      }
+    };
+    ferrule(hpC, .035, .02, -1);
     const mpC = new THREE.CatmullRomCurve3([V(.2, -1.14, -.1), V(.52, -1.22, -.16), V(.86, -1.0, -.58), V(.79, -.45, -1.04), V(.56, .35, -1.36), V(.52, 1.05, -1.47), V(.44, 1.47, -1.68), dvIn], false, 'centripetal');
     G.hoses.add(mesh(new THREE.TubeGeometry(mpC, 120, .032, 12), M.hose));
+    ferrule(mpC, .028, .032, -1); ferrule(mpC, .978, .032, 1);
     const cpP = mpC.getPointAt(.5), cpT = mpC.getTangentAt(.5), cq = new THREE.Quaternion().setFromUnitVectors(V(0, 1, 0), cpT);
     for (const [r, h, o, six] of [[.05, .11, 0, 0], [.06, .04, .075, 1], [.046, .06, -.085, 0], [.058, .03, -.125, 1]]){
       const m = mesh(cyl(r, r, h, six ? 6 : 20), M.chromeH); m.quaternion.copy(cq); m.position.copy(cpP).addScaledVector(cpT, o); G.hoses.add(m);
@@ -1224,7 +1240,7 @@ async function main(){
   addAnchor('cylinder', G.cylinder, 0, 1.3, 0);
   addAnchor('plate', G.plate, 0, 1.13, -.24);
   addAnchor('reducer', G.plate, 0, -1.34, -.08);
-  addAnchor('gauge', G.gauge, 0, -.42, 0);
+  addAnchor('gauge', G.gauge, 0, -.58, 0);
   addAnchor('mask', G.mask, 0, .58, 0);
   addAnchor('dv', G.dv, 0, -.13, .08);
   const tagEls = {}; tagsEl.querySelectorAll('li').forEach((li) => tagEls[li.dataset.tag] = li);
